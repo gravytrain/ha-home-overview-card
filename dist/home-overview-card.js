@@ -113,28 +113,40 @@ class HomeOverviewCard extends HTMLElement {
   async _loadForecast() {
     if (!this._hass || !this._config.weather_entity) return;
     try {
-      const result = await this._hass.callWS({
-        type: 'weather/subscribe_forecast',
-        forecast_type: 'hourly',
-        entity_id: this._config.weather_entity,
-      });
-      if (result && result.forecast) {
-        this._forecast = result.forecast;
+      const msg = {
+        type: 'execute_script',
+        sequence: [{
+          service: 'weather.get_forecasts',
+          target: { entity_id: this._config.weather_entity },
+          data: { type: 'hourly' },
+          response_variable: 'forecast_result',
+        }],
+      };
+      const result = await this._hass.callWS(msg);
+      const key = this._config.weather_entity;
+      if (result?.response?.forecast_result?.[key]?.forecast) {
+        this._forecast = result.response.forecast_result[key].forecast;
         this._renderForecastSection();
+        return;
       }
-    } catch (err) {
-      try {
-        const result = await this._hass.callService('weather', 'get_forecasts', {
-          type: 'hourly',
-        }, { entity_id: this._config.weather_entity });
-        const key = this._config.weather_entity;
-        if (result?.response?.[key]?.forecast) {
-          this._forecast = result.response[key].forecast;
-          this._renderForecastSection();
+    } catch (err) {}
+    try {
+      const unsub = await this._hass.connection.subscribeMessage(
+        (event) => {
+          if (event.forecast) {
+            this._forecast = event.forecast;
+            this._renderForecastSection();
+          }
+        },
+        {
+          type: 'weather/subscribe_forecast',
+          forecast_type: 'hourly',
+          entity_id: this._config.weather_entity,
         }
-      } catch (err2) {
-        this._forecast = null;
-      }
+      );
+      this._forecastUnsub = unsub;
+    } catch (err2) {
+      this._forecast = null;
     }
   }
 
