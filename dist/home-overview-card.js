@@ -59,6 +59,12 @@ class HomeOverviewCard extends HTMLElement {
       setInterval(() => this._loadBriefing(), 600000);
     }
 
+    if (!this._forecastLoaded) {
+      this._forecastLoaded = true;
+      this._loadForecast();
+      setInterval(() => this._loadForecast(), 1800000);
+    }
+
     if (!oldHass) {
       this._render();
       return;
@@ -102,6 +108,40 @@ class HomeOverviewCard extends HTMLElement {
     } catch (err) {
       this._briefing = null;
     }
+  }
+
+  async _loadForecast() {
+    if (!this._hass || !this._config.weather_entity) return;
+    try {
+      const result = await this._hass.callWS({
+        type: 'weather/subscribe_forecast',
+        forecast_type: 'hourly',
+        entity_id: this._config.weather_entity,
+      });
+      if (result && result.forecast) {
+        this._forecast = result.forecast;
+        this._renderForecastSection();
+      }
+    } catch (err) {
+      try {
+        const result = await this._hass.callService('weather', 'get_forecasts', {
+          type: 'hourly',
+        }, { entity_id: this._config.weather_entity });
+        const key = this._config.weather_entity;
+        if (result?.response?.[key]?.forecast) {
+          this._forecast = result.response[key].forecast;
+          this._renderForecastSection();
+        }
+      } catch (err2) {
+        this._forecast = null;
+      }
+    }
+  }
+
+  _renderForecastSection() {
+    const container = this.shadowRoot?.querySelector('.forecast-row');
+    if (!container) return;
+    container.innerHTML = this._renderForecast();
   }
 
   _renderBriefingSection() {
@@ -162,10 +202,9 @@ class HomeOverviewCard extends HTMLElement {
   }
 
   _renderForecast() {
-    const weather = this._getState(this._config.weather_entity);
-    const forecast = weather?.attributes?.forecast;
+    const forecast = this._forecast;
     if (!forecast || forecast.length === 0) {
-      return '<div class="forecast-empty">Forecast data unavailable</div>';
+      return '<div class="forecast-empty">Loading forecast...</div>';
     }
 
     const now = new Date();
@@ -284,9 +323,9 @@ class HomeOverviewCard extends HTMLElement {
       }
     }
 
-    const weather = this._getState(this._config.weather_entity);
-    if (weather?.attributes?.forecast) {
-      const next12h = weather.attributes.forecast.slice(0, 12);
+    const forecast = this._forecast;
+    if (forecast && forecast.length > 0) {
+      const next12h = forecast.slice(0, 12);
       const stormHour = next12h.find(f => f.condition === 'lightning-rainy' || (f.precipitation_probability && f.precipitation_probability >= 60));
       if (stormHour) {
         const stormTime = new Date(stormHour.datetime).toLocaleTimeString('en-US', { hour: 'numeric' });
@@ -446,7 +485,7 @@ class HomeOverviewCard extends HTMLElement {
     const windSpeed = weather?.attributes?.wind_speed || '--';
     const weatherState = weather?.state?.replace(/_/g, ' ') || '--';
     const weatherIcon = this._getWeatherIcon(weather?.state);
-    const highTemp = weather?.attributes?.forecast?.[0]?.temperature || '--';
+    const highTemp = this._forecast?.[0]?.temperature || '--';
 
     this.shadowRoot.innerHTML = `
       <style>${this._styles()}</style>
