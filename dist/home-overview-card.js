@@ -4,7 +4,7 @@
  * Shows weather, forecast, calendar, AI briefing, alerts, and system status.
  */
 
-const HOME_CARD_VERSION = '0.1.0';
+const HOME_CARD_VERSION = '0.2.0';
 
 class HomeOverviewCard extends HTMLElement {
   constructor() {
@@ -99,7 +99,7 @@ class HomeOverviewCard extends HTMLElement {
 
   async _loadBriefing() {
     try {
-      const res = await fetch(`${this._config.daystrom_url}/api/briefings/latest`);
+      const res = await fetch(`/local/ai_briefing.json?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         this._briefing = data;
