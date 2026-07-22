@@ -4,7 +4,7 @@
  * Shows weather, forecast, calendar, AI briefing, alerts, and system status.
  */
 
-const HOME_CARD_VERSION = '0.2.0';
+const HOME_CARD_VERSION = '0.3.0';
 
 class HomeOverviewCard extends HTMLElement {
   constructor() {
@@ -375,9 +375,9 @@ class HomeOverviewCard extends HTMLElement {
     const pollenState = pollenEntity ? this._stateValue(pollenEntity, '') : '';
 
     return `
-      <span style="font-size:13px; font-weight:600; color:#fff;">🌬️ Air Quality</span>
+      <span style="font-size:13px; font-weight:600; color:var(--ink);">🌬️ Air Quality</span>
       <div class="aqi-badge ${aqiClass}">AQI ${aqi} · ${aqiLabel}</div>
-      ${pollenState ? `<span style="font-size:11px; color:#888;">Pollen: ${pollenState}</span>` : ''}
+      ${pollenState ? `<span style="font-size:11px; color:var(--ink-dim);">Pollen: ${pollenState}</span>` : ''}
     `;
   }
 
@@ -422,7 +422,7 @@ class HomeOverviewCard extends HTMLElement {
         <div class="label">Temperature</div>
       </div>
       <div class="stat-card">
-        <div class="value" ${allClosed ? 'style="color:#1D9E75"' : 'style="color:#e74c3c"'}>${allClosed ? 'All' : 'Open!'}</div>
+        <div class="value" ${allClosed ? 'style="color:var(--ledger)"' : 'style="color:var(--needle)"'}>${allClosed ? 'All' : 'Open!'}</div>
         <div class="label">Doors Closed</div>
       </div>
       <div class="stat-card">
@@ -449,7 +449,7 @@ class HomeOverviewCard extends HTMLElement {
   _renderEnergy() {
     const energyEntities = this._config.energy_entities;
     if (energyEntities.length === 0) {
-      return '<p style="font-size:12px;color:#666;font-style:italic;">Add energy_entities to config to enable</p>';
+      return '<p style="font-size:12px;color:var(--ink-faint);font-style:italic;">Add energy_entities to config to enable</p>';
     }
 
     return energyEntities.map(entityId => {
@@ -469,7 +469,7 @@ class HomeOverviewCard extends HTMLElement {
   _renderCameras() {
     const cameraEntities = this._config.camera_entities;
     if (cameraEntities.length === 0) {
-      return '<p style="font-size:12px;color:#666;font-style:italic;">Add camera_entities to config to enable</p>';
+      return '<p style="font-size:12px;color:var(--ink-faint);font-style:italic;">Add camera_entities to config to enable</p>';
     }
 
     return cameraEntities.map(entityId => {
@@ -654,267 +654,52 @@ class HomeOverviewCard extends HTMLElement {
 
   _styles() {
     return `
-      :host { display: block; }
-      .card {
-        background: #0f0f1a;
-        border-radius: 16px;
-        padding: 24px;
-        color: #e0e0e0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      :host {
+        display: block;
+        --housing: #14161b; --panel: #1c2027; --panel-2: #23282f; --well: #171a20;
+        --bezel: #2c323b; --hairline: #333a44; --brass: #d9a441; --brass-dim: #a67f34;
+        --needle: #c8483a; --ledger: #9fbf8f; --ink: #e7e3d8; --ink-dim: #9aa0ab; --ink-faint: #6b7280;
+        --font-display: 'Oswald', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+        --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       }
-
-      /* Header */
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-      .header h1 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 700;
-        color: #fff;
-      }
-      .header-sub {
-        font-size: 12px;
-        color: #888;
-      }
-      .badge { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px; }
-      .badge-green { background: #1D9E75; color: #fff; }
-
-      /* Sections */
-      .section {
-        background: #1a1a2e;
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 16px;
-      }
+      .card { background: radial-gradient(circle at 92% 0%, #2d26193d, transparent 34%), var(--housing); border: 1px solid var(--bezel); border-radius: 16px; padding: 24px; color: var(--ink); font-family: var(--font-body); box-shadow: 0 12px 32px #0005; }
+      .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+      .header h1 { margin: 0; font: 700 20px var(--font-display); letter-spacing: .035em; color: var(--ink); }
+      .header-sub { font-size: 12px; color: var(--ink-dim); }
+      .badge { font: 700 10px var(--font-mono); padding: 4px 10px; border-radius: 4px; letter-spacing: .08em; }
+      .badge-green { background: var(--ledger); color: var(--housing); }
+      .section { background: var(--panel); border: 1px solid var(--bezel); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
       .section-compact { padding: 14px 20px; }
-      .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 14px;
-      }
-      .section-header h2 {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #fff;
-      }
-
-      /* AI Briefing */
-      .briefing-section {
-        border: 1px solid rgba(147,51,234,0.3);
-        background: linear-gradient(135deg, #1a1a2e 0%, #1e1533 100%);
-      }
-      .ai-sparkle {
-        background: linear-gradient(135deg, #9333ea, #6366f1);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 16px;
-      }
-      .briefing-text {
-        font-size: 13px;
-        line-height: 1.8;
-        color: #d0d0e0;
-        margin: 0;
-      }
-      .briefing-meta {
-        margin-top: 10px;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-      .briefing-source, .briefing-time {
-        font-size: 10px;
-        color: #555;
-        background: #16213e;
-        padding: 4px 8px;
-        border-radius: 4px;
-      }
-      .briefing-placeholder {
-        font-size: 12px;
-        color: #666;
-        font-style: italic;
-        margin: 0;
-      }
-      .briefing-update-time {
-        font-size: 10px;
-        color: #666;
-      }
-
-      /* Weather Banner */
-      .weather-banner {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 16px 20px;
-        border-radius: 12px;
-        margin-bottom: 16px;
-        background: linear-gradient(135deg, #1D9E75 0%, #16a085 100%);
-        color: #fff;
-      }
-      .wb-icon { font-size: 24px; }
-      .wb-text { flex: 1; font-size: 14px; line-height: 1.5; }
-      .wb-text strong { font-size: 16px; }
-
-      /* Forecast Row */
-      .forecast-row {
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        padding: 4px 0;
-        margin-bottom: 16px;
-      }
-      .forecast-row::-webkit-scrollbar { height: 4px; }
-      .forecast-row::-webkit-scrollbar-thumb { background: #2a2a3e; border-radius: 2px; }
-      .forecast-hour {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-width: 68px;
-        background: #1a1a2e;
-        border-radius: 10px;
-        padding: 10px 8px;
-        gap: 4px;
-        flex-shrink: 0;
-      }
-      .fh-time { font-size: 10px; color: #888; font-weight: 600; }
-      .fh-icon { font-size: 18px; }
-      .fh-temp { font-size: 13px; font-weight: 700; color: #fff; }
-      .fh-rain { font-size: 10px; color: #4fc3f7; min-height: 14px; }
-      .forecast-empty { font-size: 12px; color: #666; font-style: italic; padding: 10px; }
-
-      /* Sun Moon */
-      .sun-moon-bar {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-        flex-wrap: wrap;
-        font-size: 12px;
-        color: #aaa;
-      }
-      .sm-item { display: flex; align-items: center; gap: 6px; }
-      .sm-icon { font-size: 16px; }
-      .sm-val { font-weight: 600; color: #fff; }
-
-      /* Calendar */
-      .calendar-strip { display: flex; flex-direction: column; gap: 6px; }
-      .cal-event {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        background: #16213e;
-        border-radius: 8px;
-        border-left: 3px solid #1D9E75;
-      }
-      .cal-event.work { border-left-color: #4285f4; }
-      .cal-event.family { border-left-color: #9c27b0; }
-      .cal-event.property { border-left-color: #1D9E75; }
-      .cal-time { font-size: 11px; font-weight: 700; color: #888; min-width: 60px; font-family: monospace; }
-      .cal-title { font-size: 13px; font-weight: 600; color: #fff; flex: 1; }
-      .cal-cal { font-size: 10px; color: #666; }
-      .cal-empty { font-size: 12px; color: #666; font-style: italic; }
-
-      /* Household Alerts */
-      .household-alerts { display: flex; flex-direction: column; gap: 6px; }
-      .ha-alert {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        background: #16213e;
-        border-radius: 8px;
-        font-size: 12px;
-      }
-      .ha-icon { font-size: 16px; width: 24px; text-align: center; }
-      .ha-text { flex: 1; color: #e0e0e0; }
-      .ha-meta { font-size: 10px; color: #666; }
-
-      /* AQI */
-      .aqi-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-      .aqi-badge {
-        display: flex; align-items: center; gap: 6px;
-        padding: 6px 12px; border-radius: 6px;
-        font-size: 12px; font-weight: 600;
-      }
-      .aqi-good { background: rgba(29,158,117,0.15); color: #1D9E75; }
-      .aqi-moderate { background: rgba(212,160,23,0.15); color: #d4a017; }
-      .aqi-unhealthy { background: rgba(231,76,60,0.15); color: #e74c3c; }
-      .aqi-unavailable { font-size: 12px; color: #666; font-style: italic; }
-
-      /* Needs Attention */
-      .attention-list { list-style: none; padding: 0; margin: 0; }
-      .attention-list li {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid #2a2a3e;
-        font-size: 13px;
-      }
-      .attention-list li:last-child { border-bottom: none; }
-      .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-      .dot-green { background: #1D9E75; }
-      .dot-yellow { background: #d4a017; }
-      .dot-red { background: #e74c3c; }
-
-      /* Quick Stats */
-      .quick-stats { display: flex; gap: 16px; flex-wrap: wrap; }
-      .stat-card {
-        flex: 1;
-        min-width: 100px;
-        background: #16213e;
-        border-radius: 10px;
-        padding: 16px;
-        text-align: center;
-      }
-      .stat-card .value { font-size: 24px; font-weight: 700; color: #fff; }
-      .stat-card .unit { font-size: 14px; color: #888; font-weight: 400; }
-      .stat-card .label {
-        font-size: 11px; color: #888; margin-top: 4px;
-        text-transform: uppercase; letter-spacing: 0.5px;
-      }
-
-      /* Systems */
-      .systems-row { display: flex; gap: 10px; flex-wrap: wrap; }
-      .sys-pill {
-        display: flex; align-items: center; gap: 6px;
-        padding: 6px 12px; background: #16213e;
-        border-radius: 20px; font-size: 11px; font-weight: 600; color: #e0e0e0;
-      }
-      .sys-dot { width: 8px; height: 8px; border-radius: 50%; }
-      .sys-dot.up { background: #1D9E75; }
-      .sys-dot.down { background: #e74c3c; animation: pulse-dot 2s infinite; }
-      @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-      /* Energy */
-      .energy-row {
-        display: flex; justify-content: space-between;
-        font-size: 13px; padding: 4px 0;
-      }
-      .energy-val { font-weight: 600; color: #4285f4; }
-
-      /* Cameras */
-      .camera-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-      .camera-card { background: #16213e; border-radius: 8px; overflow: hidden; }
-      .camera-feed {
-        width: 100%; height: 70px; background: #0a0a15;
-        display: flex; align-items: center; justify-content: center;
-        color: #555; font-size: 11px;
-      }
-      .camera-label { padding: 6px 10px; font-size: 11px; font-weight: 600; color: #ccc; }
-
-      /* Grid */
-      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-      @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
-
-      /* Footer */
-      .footer { text-align: center; margin-top: 12px; }
-      .version { font-size: 10px; color: #444; }
+      .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+      .section-header h2 { margin: 0; font: 700 14px var(--font-display); letter-spacing: .035em; color: var(--ink); }
+      .briefing-section { border-color: var(--brass-dim); background: linear-gradient(135deg, var(--panel) 0%, #2b261a 100%); }
+      .ai-sparkle { background: linear-gradient(135deg, var(--brass), var(--ledger)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 16px; }
+      .briefing-text { font-size: 13px; line-height: 1.8; color: var(--ink); margin: 0; }
+      .briefing-meta { margin-top: 10px; display: flex; gap: 12px; align-items: center; }
+      .briefing-source, .briefing-time { font: 10px var(--font-mono); color: var(--ink-faint); background: var(--well); padding: 4px 8px; border-radius: 4px; }
+      .briefing-placeholder, .forecast-empty, .cal-empty, .aqi-unavailable { font-size: 12px; color: var(--ink-faint); font-style: italic; margin: 0; }
+      .briefing-update-time { font: 10px var(--font-mono); color: var(--ink-faint); }
+      .weather-banner { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 12px; margin-bottom: 16px; background: linear-gradient(135deg, var(--ledger) 0%, #6f9167 100%); color: var(--housing); }
+      .wb-icon { font-size: 24px; } .wb-text { flex: 1; font-size: 14px; line-height: 1.5; } .wb-text strong { font-size: 16px; }
+      .forecast-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; margin-bottom: 16px; }
+      .forecast-row::-webkit-scrollbar { height: 4px; } .forecast-row::-webkit-scrollbar-thumb { background: var(--bezel); border-radius: 2px; }
+      .forecast-hour { display: flex; flex-direction: column; align-items: center; min-width: 68px; background: var(--panel); border: 1px solid var(--bezel); border-radius: 10px; padding: 10px 8px; gap: 4px; flex-shrink: 0; }
+      .fh-time { font: 600 10px var(--font-mono); color: var(--ink-dim); } .fh-icon { font-size: 18px; } .fh-temp { font-size: 13px; font-weight: 700; color: var(--ink); } .fh-rain { font-size: 10px; color: #4fc3f7; min-height: 14px; }
+      .sun-moon-bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--ink-dim); } .sm-item { display: flex; align-items: center; gap: 6px; } .sm-icon { font-size: 16px; } .sm-val { font-weight: 600; color: var(--ink); }
+      .calendar-strip, .household-alerts { display: flex; flex-direction: column; gap: 6px; }
+      .cal-event, .ha-alert { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--well); border-radius: 8px; }
+      .cal-event { border-left: 3px solid var(--ledger); } .cal-event.work { border-left-color: #4285f4; } .cal-event.family { border-left-color: #9c27b0; } .cal-event.property { border-left-color: var(--ledger); }
+      .cal-time { font: 700 11px var(--font-mono); color: var(--ink-dim); min-width: 60px; } .cal-title { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; } .cal-cal, .ha-meta { font-size: 10px; color: var(--ink-faint); }
+      .ha-alert { font-size: 12px; } .ha-icon { font-size: 16px; width: 24px; text-align: center; } .ha-text { flex: 1; color: var(--ink); }
+      .aqi-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; } .aqi-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+      .aqi-good { background: color-mix(in srgb, var(--ledger) 15%, transparent); color: var(--ledger); } .aqi-moderate { background: color-mix(in srgb, var(--brass) 15%, transparent); color: var(--brass); } .aqi-unhealthy { background: color-mix(in srgb, var(--needle) 15%, transparent); color: var(--needle); }
+      .attention-list { list-style: none; padding: 0; margin: 0; } .attention-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--hairline); font-size: 13px; } .attention-list li:last-child { border-bottom: none; } .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; } .dot-green { background: var(--ledger); } .dot-yellow { background: var(--brass); } .dot-red { background: var(--needle); }
+      .quick-stats { display: flex; gap: 16px; flex-wrap: wrap; } .stat-card { flex: 1; min-width: 100px; background: var(--well); border: 1px solid var(--bezel); border-radius: 10px; padding: 16px; text-align: center; } .stat-card .value { font-size: 24px; font-weight: 700; color: var(--ink); } .stat-card .unit { font-size: 14px; color: var(--ink-dim); font-weight: 400; } .stat-card .label { font: 11px var(--font-mono); color: var(--ink-dim); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+      .systems-row { display: flex; gap: 10px; flex-wrap: wrap; } .sys-pill { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--well); border: 1px solid var(--bezel); border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--ink); } .sys-dot { width: 8px; height: 8px; border-radius: 50%; } .sys-dot.up { background: var(--ledger); } .sys-dot.down { background: var(--needle); animation: pulse-dot 2s infinite; } @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+      .energy-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; } .energy-val { font-weight: 600; color: #4285f4; }
+      .camera-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .camera-card { background: var(--well); border: 1px solid var(--bezel); border-radius: 8px; overflow: hidden; } .camera-feed { width: 100%; height: 70px; background: var(--housing); display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-size: 11px; } .camera-label { padding: 6px 10px; font-size: 11px; font-weight: 600; color: var(--ink-dim); }
+      .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } } .footer { text-align: center; margin-top: 12px; } .version { font: 10px var(--font-mono); color: var(--ink-faint); }
     `;
   }
 

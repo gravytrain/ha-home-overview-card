@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home Overview Card — v0.3.0 mockup</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 32px 16px; background: #0d0f12; color: #e7e3d8; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; }
+    .preview-label { margin: 0 0 14px 4px; color: #9aa0ab; font: 11px 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="preview-label">Home Overview Card · local visual mockup · sample data</p>
+    <home-overview-card></home-overview-card>
+  </main>
+  <script>window.customCards = [];</script>
+  <script src="dist/home-overview-card.js"></script>
+  <script>
+    const now = new Date();
+    const at = (hours) => new Date(now.getTime() + hours * 3600000).toISOString();
+    const forecast = [
+      ['partlycloudy', 76, 0], ['partlycloudy', 78, 5], ['sunny', 80, 0], ['rainy', 76, 35],
+      ['lightning-rainy', 72, 70], ['rainy', 70, 55], ['cloudy', 68, 15], ['clear-night', 65, 0]
+    ].map(([condition, temperature, precipitation_probability], index) => ({ datetime: at(index + 1), condition, temperature, precipitation_probability }));
+    const state = (value, attributes = {}) => ({ state: String(value), attributes });
+    const card = document.querySelector('home-overview-card');
+    card.setConfig({
+      show_briefing: true, weather_entity: 'weather.home', sun_entity: 'sun.sun', moon_entity: 'sensor.moon_phase',
+      calendar_entities: ['calendar.work', 'calendar.family'], aqi_entity: 'sensor.airnow_aqi', pollen_entity: 'sensor.pollen',
+      packages_entity: 'sensor.packages', waste_entity: 'sensor.waste_collection', person_entities: ['person.michael', 'person.alex'],
+      door_entities: ['binary_sensor.pumphouse_door'], system_entities: ['binary_sensor.internet_ping', 'binary_sensor.daystrom_ping'],
+      energy_entities: ['sensor.north_daily_energy', 'sensor.south_daily_energy'], camera_entities: ['camera.front_yard', 'camera.back_yard']
+    });
+    card.hass = {
+      user: { name: 'Michael' },
+      states: {
+        'weather.home': state('partlycloudy', { temperature: 74, humidity: 64, wind_speed: 8 }),
+        'sun.sun': state('above_horizon', { next_rising: at(17), next_setting: at(9) }),
+        'sensor.moon_phase': state('waxing_gibbous'),
+        'calendar.work': state('on', { message: 'Project planning', start_time: at(2) }),
+        'calendar.family': state('on', { message: 'Dinner with family', start_time: at(6) }),
+        'sensor.airnow_aqi': state(42), 'sensor.pollen': state('Low'), 'sensor.packages': state(2),
+        'sensor.waste_collection': state('Trash pickup tomorrow', { friendly_name: 'Waste collection' }),
+        'person.michael': state('home'), 'person.alex': state('home'), 'binary_sensor.pumphouse_door': state('off', { friendly_name: 'Pumphouse door' }),
+        'binary_sensor.internet_ping': state('on', { friendly_name: 'Internet' }), 'binary_sensor.daystrom_ping': state('on', { friendly_name: 'Daystrom' }),
+        'sensor.north_daily_energy': state('18.4', { friendly_name: 'North array', unit_of_measurement: 'kWh' }),
+        'sensor.south_daily_energy': state('21.7', { friendly_name: 'South array', unit_of_measurement: 'kWh' }),
+        'camera.front_yard': state('idle', { friendly_name: 'Front yard' }), 'camera.back_yard': state('idle', { friendly_name: 'Back yard' })
+      },
+      callWS: async () => ({ response: { forecast_result: { 'weather.home': { forecast } } } }),
+      connection: { subscribeMessage: async () => () => {} }
+    };
+    card._briefing = { content: 'A warm start gives way to a chance of afternoon storms. You have two events on the calendar, and household systems are reporting normally.', sources: 'weather, calendar, sensors', created_at: now.toISOString() };
+    card._render();
+  </script>
+</body>
+</html>

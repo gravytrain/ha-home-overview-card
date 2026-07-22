@@ -96,3 +96,14 @@ Each section gracefully degrades — if the integration isn't set up or the enti
 | Waste | Waste Collection Schedule (HACS) |
 | Systems | Ping or Uptime Kuma |
 | AI Briefing | Daystrom + LLM automation |
+
+## Development preview
+
+Open [mockup.html](mockup.html) in a browser to view the current card against representative local data, without connecting to Home Assistant.
+
+## Changelog
+
+### 0.3.0
+
+- Applied the shared graphite, brass, and ledger design system used by the RV Energy and Home Management cards.
+- Preserved semantic weather, forecast, and calendar colors while improving typography, contrast, borders, and status treatment.
