@@ -4,7 +4,7 @@
  * Shows weather, forecast, calendar, AI briefing, alerts, and system status.
  */
 
-const HOME_CARD_VERSION = '0.3.0';
+const HOME_CARD_VERSION = '0.3.1';
 
 class HomeOverviewCard extends HTMLElement {
   constructor() {
@@ -42,6 +42,9 @@ class HomeOverviewCard extends HTMLElement {
       person_entities: config.person_entities || [],
       camera_entities: config.camera_entities || [],
       system_entities: config.system_entities || [],
+      alert_entities: config.alert_entities || [],
+      system_up_states: config.system_up_states || ['on', 'home', 'alive', 'normal', 'ready', 'healthy', 'has_acceptable_disk', 'asleep'],
+      alert_active_states: config.alert_active_states || ['on', 'unavailable', 'unknown'],
       door_entities: config.door_entities || [],
       energy_entities: config.energy_entities || [],
       ...config,
@@ -91,6 +94,7 @@ class HomeOverviewCard extends HTMLElement {
       ...this._config.person_entities,
       ...this._config.camera_entities,
       ...this._config.system_entities,
+      ...this._config.alert_entities,
       ...this._config.door_entities,
       ...this._config.energy_entities,
     ];
@@ -397,6 +401,17 @@ class HomeOverviewCard extends HTMLElement {
       items.push({ color: 'green', text: 'All doors closed' });
     }
 
+    const activeAlertStates = this._config.alert_active_states;
+    for (const entityId of this._config.alert_entities) {
+      const state = this._getState(entityId);
+      if (!state || !activeAlertStates.includes(state.state)) continue;
+      const name = state.attributes?.friendly_name || entityId.replace(/^.*[.]/, '').replace(/_/g, ' ');
+      const text = entityId.startsWith('update.') && state.state === 'on'
+        ? `<strong>${name}</strong> is available`
+        : `<strong>${name}</strong> requires attention (${state.state})`;
+      items.push({ color: state.state === 'unavailable' ? 'red' : 'yellow', text });
+    }
+
     if (items.length === 0) {
       items.push({ color: 'green', text: 'Nothing needs attention right now' });
     }
@@ -441,7 +456,7 @@ class HomeOverviewCard extends HTMLElement {
     return systemEntities.map(entityId => {
       const state = this._getState(entityId);
       const name = state?.attributes?.friendly_name || entityId.replace('binary_sensor.', '').replace(/_/g, ' ');
-      const isUp = state?.state === 'on' || state?.state === 'home' || state?.state === 'alive';
+      const isUp = !!state && this._config.system_up_states.includes(state.state);
       return `<div class="sys-pill"><span class="sys-dot ${isUp ? 'up' : 'down'}"></span> ${name}</div>`;
     }).join('');
   }
